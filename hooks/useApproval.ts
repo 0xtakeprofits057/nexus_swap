@@ -26,7 +26,7 @@ export function useApproval(
     query:        { enabled: !native && !!token && !!ownerAddress },
   })
 
-  const { writeContract, data: approveTxHash, isPending: isApproving } = useWriteContract()
+  const { writeContractAsync, data: approveTxHash, isPending: isApproving, error: writeError } = useWriteContract()
 
   const { isLoading: isWaitingApproval, isSuccess: isApproved } =
     useWaitForTransactionReceipt({ hash: approveTxHash })
@@ -38,22 +38,28 @@ export function useApproval(
     !!ownerAddress &&
     (allowance === undefined || (allowance as bigint) === 0n)
 
-  function approve() {
+  async function approve(): Promise<void> {
     if (!token || native) return
-    writeContract({
-      address:      token.address as `0x${string}`,
-      abi:          erc20Abi,
-      functionName: 'approve',
-      args:         [spender, maxUint256],
-    })
+    try {
+      await writeContractAsync({
+        address:      token.address as `0x${string}`,
+        abi:          erc20Abi,
+        functionName: 'approve',
+        args:         [spender, maxUint256],
+      })
+    } catch (err) {
+      // Surface error to console — SwapCard will show it via writeError
+      console.error('[useApproval] approve failed:', err)
+    }
   }
 
   return {
     needsApproval,
     approve,
-    isApproving:  isApproving || isWaitingApproval,
+    isApproving:    isApproving || isWaitingApproval,
     isApproved,
     refetchAllowance,
     spender,
+    approveError:   writeError?.message,
   }
 }

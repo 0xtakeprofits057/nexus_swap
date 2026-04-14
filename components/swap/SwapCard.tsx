@@ -47,7 +47,7 @@ export function SwapCard() {
 
   // Dynamic spender: Permit2 for 0x, router address for Odos/KyberSwap
   const spenderOverride = quote?.routerAddress
-  const { needsApproval, approve, isApproving, refetchAllowance } =
+  const { needsApproval, approve, isApproving, refetchAllowance, approveError } =
     useApproval(sellToken, address, spenderOverride)
 
   const { executeSwap, status: swapStatus, txHash, error: swapError, reset } =
@@ -143,6 +143,12 @@ export function SwapCard() {
             providerName={quote.providerName}
             allQuotes={quote.allQuotes}
           />
+        </div>
+      )}
+
+      {approveError && (
+        <div className="mt-3 p-3 bg-red-900/20 border border-red-800/50 rounded-xl text-red-400 text-sm">
+          Approval failed: {approveError}
         </div>
       )}
 

@@ -5,6 +5,9 @@ export const TREASURY_ADDRESS = process.env.TREASURY_ADDRESS as `0x${string}`
 // ─── Permit2 (same address on all EVM chains) ─────────────────────────────────
 export const PERMIT2_ADDRESS = '0x000000000022D473030F116dDEE9F6B43aC78BA3' as const
 
+// ─── Native token sentinel address (ETH, POL, etc.) ──────────────────────────
+export const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' as const
+
 // ─── Slippage defaults (in basis points) ─────────────────────────────────────
 export const SLIPPAGE_SAME_PEG  = 10   // 0.1%  stable↔stable same currency
 export const SLIPPAGE_CROSS_PEG = 50   // 0.5%  stable↔stable cross-currency

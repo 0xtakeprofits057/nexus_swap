@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useAccount, useChainId }           from 'wagmi'
-import { ConnectButton }                    from '@rainbow-me/rainbowkit'
+import { useAccount, useChainId, useSwitchChain } from 'wagmi'
 import { TokenInput }                       from './TokenInput'
 import { SwapButton }                       from './SwapButton'
 import { SwapDetails }                      from './SwapDetails'
@@ -12,19 +11,19 @@ import { useSwapExecution }                 from '@/hooks/useSwapExecution'
 import { useTokenBalance }                  from '@/hooks/useTokenBalance'
 import { parseTokenAmount, formatTokenAmount } from '@/lib/format'
 import { DEFAULT_PAIRS, getTokenByAddress }    from '@/lib/tokens'
+import { SUPPORTED_CHAINS, CHAIN_NAMES }       from '@/lib/chains'
 import { SLIPPAGE_CROSS_PEG }               from '@/lib/constants'
 import type { Token }                       from '@/lib/providers/types'
 
 export function SwapCard() {
   const chainId          = useChainId()
   const { address }      = useAccount()
+  const { switchChain }  = useSwitchChain()
 
-  // ─── Token state ──────────────────────────────────────────────────────────
   const [sellToken, setSellToken] = useState<Token | null>(null)
   const [buyToken,  setBuyToken]  = useState<Token | null>(null)
   const [sellAmountStr, setSellAmountStr] = useState('')
 
-  // Load default pair when chain changes
   useEffect(() => {
     const [defaultSell, defaultBuy] = DEFAULT_PAIRS[chainId] ?? []
     if (defaultSell) setSellToken(getTokenByAddress(defaultSell, chainId) ?? null)
@@ -36,25 +35,18 @@ export function SwapCard() {
     ? parseTokenAmount(sellAmountStr, sellToken.decimals)
     : 0n
 
-  // ─── Quote ────────────────────────────────────────────────────────────────
   const { data: quote, isLoading: quoteLoading, error: quoteError } = useSwapQuote({
-    sellToken,
-    buyToken,
-    sellAmount,
-    chainId,
-    slippageBps: SLIPPAGE_CROSS_PEG,
+    sellToken, buyToken, sellAmount, chainId, slippageBps: SLIPPAGE_CROSS_PEG,
   })
 
   const buyAmountStr = buyToken && quote?.buyAmount
     ? formatTokenAmount(quote.buyAmount, buyToken.decimals, 6)
     : ''
 
-  // ─── Balance + approval ───────────────────────────────────────────────────
   const { balance }            = useTokenBalance(sellToken)
   const { needsApproval, approve, isApproving, refetchAllowance } =
     useApproval(sellToken, address)
 
-  // ─── Swap execution ───────────────────────────────────────────────────────
   const { executeSwap, status: swapStatus, txHash, error: swapError, reset } =
     useSwapExecution()
 
@@ -65,35 +57,39 @@ export function SwapCard() {
     setSellAmountStr('')
   }, [sellToken, buyToken, sellAmount, chainId, executeSwap, refetchAllowance])
 
-  // ─── Flip tokens ─────────────────────────────────────────────────────────
   function flipTokens() {
     setSellToken(buyToken)
     setBuyToken(sellToken)
     setSellAmountStr(buyAmountStr)
   }
 
-  // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="bg-[#141414] border border-gray-800 rounded-2xl p-4 w-full max-w-md shadow-2xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-white text-lg">Swap</h2>
-        <div className="flex items-center gap-2">
-          <ConnectButton chainStatus="icon" showBalance={false} />
-        </div>
+    <div className="bg-[#141414] border border-gray-800 rounded-2xl p-4 shadow-2xl">
+      {/* Chain selector */}
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-xs text-gray-500 uppercase tracking-wider shrink-0">Chain</span>
+        <select
+          value={chainId}
+          onChange={(e) => switchChain?.({ chainId: parseInt(e.target.value) })}
+          className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none focus:border-green-500 transition-colors cursor-pointer"
+        >
+          {SUPPORTED_CHAINS.map((chain) => (
+            <option key={chain.id} value={chain.id}>
+              {CHAIN_NAMES[chain.id] ?? chain.name}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Sell input */}
       <TokenInput
         label="You pay"
         token={sellToken}
         amount={sellAmountStr}
         onAmountChange={setSellAmountStr}
         onTokenChange={setSellToken}
-        excludedToken={buyToken?.address}
+        excludedToken={buyToken?.address as `0x${string}` | undefined}
       />
 
-      {/* Flip button */}
       <div className="flex justify-center my-2">
         <button
           onClick={flipTokens}
@@ -103,18 +99,16 @@ export function SwapCard() {
         </button>
       </div>
 
-      {/* Buy output */}
       <TokenInput
         label="You receive"
         token={buyToken}
         amount={buyAmountStr}
         onTokenChange={setBuyToken}
-        excludedToken={sellToken?.address}
+        excludedToken={sellToken?.address as `0x${string}` | undefined}
         readOnly
         isLoading={quoteLoading && sellAmount > 0n}
       />
 
-      {/* Swap details */}
       {quote && sellToken && buyToken && (
         <div className="mt-3">
           <SwapDetails
@@ -129,14 +123,12 @@ export function SwapCard() {
         </div>
       )}
 
-      {/* Error */}
       {(quoteError || swapError) && (
         <div className="mt-3 p-3 bg-red-900/20 border border-red-800/50 rounded-xl text-red-400 text-sm">
           {(quoteError as Error)?.message ?? swapError}
         </div>
       )}
 
-      {/* Success */}
       {swapStatus === 'success' && txHash && (
         <div className="mt-3 p-3 bg-green-900/20 border border-green-800/50 rounded-xl text-green-400 text-sm flex items-center justify-between">
           <span>✓ Swap confirmed!</span>
@@ -151,7 +143,6 @@ export function SwapCard() {
         </div>
       )}
 
-      {/* Swap button */}
       <div className="mt-3">
         <SwapButton
           sellToken={sellToken}
@@ -171,6 +162,10 @@ export function SwapCard() {
           Start new swap
         </button>
       )}
+
+      <div className="mt-3 text-center text-xs text-gray-600">
+        0.30% fee · powered by 0x Protocol
+      </div>
     </div>
   )
 }

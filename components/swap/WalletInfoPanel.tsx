@@ -33,13 +33,13 @@ function BalanceRow({ token }: { token: Token }) {
           <div className="text-xs text-gray-500">{token.name}</div>
         </div>
       </div>
-      <div className="text-sm text-gray-300 font-medium tabular-nums">
+      <div className="text-sm font-medium tabular-nums">
         {isLoading ? (
           <div className="w-12 h-4 bg-gray-700 rounded animate-pulse" />
-        ) : balance > 0n ? (
-          formatTokenAmount(balance, token.decimals, 4)
         ) : (
-          <span className="text-gray-600">—</span>
+          <span className={balance > 0n ? 'text-white' : 'text-gray-500'}>
+            {formatTokenAmount(balance, token.decimals, 4)}
+          </span>
         )}
       </div>
     </div>

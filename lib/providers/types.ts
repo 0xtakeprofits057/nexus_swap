@@ -47,9 +47,12 @@ export interface SwapQuoteResult {
 }
 
 export interface PriceResult {
-  buyAmount:    bigint
-  price:        string
-  estimatedGas: bigint
-  priceImpact:  number
-  sources:      { name: string; proportion: string }[]
+  buyAmount:     bigint
+  price:         string
+  estimatedGas:  bigint
+  priceImpact:   number
+  sources:       { name: string; proportion: string }[]
+  // Set by aggregator layer
+  providerName?:  string
+  routerAddress?: `0x${string}`
 }

@@ -16,12 +16,12 @@ import { SLIPPAGE_CROSS_PEG }               from '@/lib/constants'
 import type { Token }                       from '@/lib/providers/types'
 
 export function SwapCard() {
-  const chainId          = useChainId()
-  const { address }      = useAccount()
-  const { switchChain }  = useSwitchChain()
+  const chainId         = useChainId()
+  const { address }     = useAccount()
+  const { switchChain } = useSwitchChain()
 
-  const [sellToken, setSellToken] = useState<Token | null>(null)
-  const [buyToken,  setBuyToken]  = useState<Token | null>(null)
+  const [sellToken,     setSellToken]     = useState<Token | null>(null)
+  const [buyToken,      setBuyToken]      = useState<Token | null>(null)
   const [sellAmountStr, setSellAmountStr] = useState('')
 
   useEffect(() => {
@@ -43,25 +43,46 @@ export function SwapCard() {
     ? formatTokenAmount(quote.buyAmount, buyToken.decimals, 6)
     : ''
 
-  const { balance }            = useTokenBalance(sellToken)
+  const { balance } = useTokenBalance(sellToken)
+
+  // Dynamic spender: Permit2 for 0x, router address for Odos/KyberSwap
+  const spenderOverride = quote?.routerAddress
   const { needsApproval, approve, isApproving, refetchAllowance } =
-    useApproval(sellToken, address)
+    useApproval(sellToken, address, spenderOverride)
 
   const { executeSwap, status: swapStatus, txHash, error: swapError, reset } =
     useSwapExecution()
 
   const handleSwap = useCallback(async () => {
     if (!sellToken || !buyToken) return
-    await executeSwap(sellToken, buyToken, sellAmount, chainId, SLIPPAGE_CROSS_PEG)
+    await executeSwap(
+      sellToken,
+      buyToken,
+      sellAmount,
+      chainId,
+      SLIPPAGE_CROSS_PEG,
+      quote?.providerName,   // pass winning provider for firm quote + execution routing
+    )
     await refetchAllowance()
     setSellAmountStr('')
-  }, [sellToken, buyToken, sellAmount, chainId, executeSwap, refetchAllowance])
+  }, [sellToken, buyToken, sellAmount, chainId, quote?.providerName, executeSwap, refetchAllowance])
 
   function flipTokens() {
     setSellToken(buyToken)
     setBuyToken(sellToken)
     setSellAmountStr(buyAmountStr)
   }
+
+  // Explorer URL per chain
+  const explorerTxUrl = txHash
+    ? ({
+        1:     `https://etherscan.io/tx/${txHash}`,
+        137:   `https://polygonscan.com/tx/${txHash}`,
+        42161: `https://arbiscan.io/tx/${txHash}`,
+        10:    `https://optimistic.etherscan.io/tx/${txHash}`,
+        8453:  `https://basescan.org/tx/${txHash}`,
+      }[chainId] ?? `https://polygonscan.com/tx/${txHash}`)
+    : undefined
 
   return (
     <div className="bg-[#141414] border border-gray-800 rounded-2xl p-4 shadow-2xl">
@@ -119,21 +140,25 @@ export function SwapCard() {
             sellToken={sellToken}
             buyToken={buyToken}
             buyAmount={quote.buyAmount}
+            providerName={quote.providerName}
+            allQuotes={quote.allQuotes}
           />
         </div>
       )}
 
       {(quoteError || swapError) && (
-        <div className="mt-3 p-3 bg-red-900/20 border border-red-800/50 rounded-xl text-red-400 text-sm">
-          {(quoteError as Error)?.message ?? swapError}
+        <div className="mt-3 p-3 bg-amber-900/20 border border-amber-800/50 rounded-xl text-amber-400 text-sm">
+          {(quoteError as Error)?.message === 'NO_LIQUIDITY'
+            ? '⚠️ No route found for this pair on this chain. Switch to Polygon for BRLA, EMXN, and other local stablecoins.'
+            : (quoteError as Error)?.message ?? swapError}
         </div>
       )}
 
-      {swapStatus === 'success' && txHash && (
+      {swapStatus === 'success' && txHash && explorerTxUrl && (
         <div className="mt-3 p-3 bg-green-900/20 border border-green-800/50 rounded-xl text-green-400 text-sm flex items-center justify-between">
           <span>✓ Swap confirmed!</span>
           <a
-            href={`https://polygonscan.com/tx/${txHash}`}
+            href={explorerTxUrl}
             target="_blank"
             rel="noreferrer"
             className="underline text-green-300 hover:text-green-200"
@@ -158,13 +183,16 @@ export function SwapCard() {
       </div>
 
       {swapStatus !== 'idle' && swapStatus !== 'signing' && swapStatus !== 'pending' && (
-        <button onClick={reset} className="mt-2 w-full text-center text-xs text-gray-500 hover:text-gray-300 transition-colors">
+        <button
+          onClick={reset}
+          className="mt-2 w-full text-center text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        >
           Start new swap
         </button>
       )}
 
       <div className="mt-3 text-center text-xs text-gray-600">
-        0.30% fee · powered by 0x Protocol
+        0.30% fee · best price across 0x, Odos & KyberSwap
       </div>
     </div>
   )

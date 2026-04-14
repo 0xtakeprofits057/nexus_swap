@@ -9,14 +9,20 @@ function isNative(token: Token | null): boolean {
   return token?.address.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
 }
 
-export function useApproval(token: Token | null, ownerAddress?: `0x${string}`) {
-  const native = isNative(token)
+export function useApproval(
+  token:         Token | null,
+  ownerAddress?: `0x${string}`,
+  // Optional: override spender — defaults to Permit2 (0x), pass router address for Odos/KyberSwap
+  spenderOverride?: `0x${string}`,
+) {
+  const native  = isNative(token)
+  const spender = spenderOverride ?? PERMIT2_ADDRESS
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address:      token?.address as `0x${string}`,
     abi:          erc20Abi,
     functionName: 'allowance',
-    args:         ownerAddress ? [ownerAddress, PERMIT2_ADDRESS] : undefined,
+    args:         ownerAddress ? [ownerAddress, spender] : undefined,
     query:        { enabled: !native && !!token && !!ownerAddress },
   })
 
@@ -38,15 +44,16 @@ export function useApproval(token: Token | null, ownerAddress?: `0x${string}`) {
       address:      token.address as `0x${string}`,
       abi:          erc20Abi,
       functionName: 'approve',
-      args:         [PERMIT2_ADDRESS, maxUint256],
+      args:         [spender, maxUint256],
     })
   }
 
   return {
     needsApproval,
     approve,
-    isApproving:   isApproving || isWaitingApproval,
+    isApproving:  isApproving || isWaitingApproval,
     isApproved,
     refetchAllowance,
+    spender,
   }
 }

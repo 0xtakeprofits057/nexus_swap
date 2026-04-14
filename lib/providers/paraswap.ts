@@ -119,7 +119,8 @@ export async function getParaswapQuote(
         srcToken:       params.sellToken,
         destToken:      params.buyToken,
         srcAmount:      params.sellAmount.toString(),
-        destAmount:     gross.toString(),
+        // Do NOT send destAmount alongside slippage — Paraswap rejects both together.
+        // slippage (in bps) covers min-output protection instead.
         priceRoute,
         userAddress:    params.taker,
         partner:        PARTNER,

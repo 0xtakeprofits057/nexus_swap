@@ -12,13 +12,13 @@ const CHAIN_SLUGS: Record<number, string> = {
   8453:  'base',
 }
 
-// KyberSwap MetaAggregationRouter v2
+// KyberSwap MetaAggregationRouter v2 (lowercase — normalized to EIP-55 checksum at call time)
 export const KYBER_ROUTERS: Record<number, `0x${string}`> = {
-  1:     '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5',
-  137:   '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5',
-  42161: '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5',
-  10:    '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5',
-  8453:  '0x6131B5fae19EA4f9D964eAc0408E4408b66337b5',
+  1:     '0x6131b5fae19ea4f9d964eac0408e4408b66337b5',
+  137:   '0x6131b5fae19ea4f9d964eac0408e4408b66337b5',
+  42161: '0x6131b5fae19ea4f9d964eac0408e4408b66337b5',
+  10:    '0x6131b5fae19ea4f9d964eac0408e4408b66337b5',
+  8453:  '0x6131b5fae19ea4f9d964eac0408e4408b66337b5',
 }
 
 export function getKyberRouter(chainId: number): `0x${string}` | undefined {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { erc20Abi, maxUint256 }  from 'viem'
+import { erc20Abi, maxUint256, getAddress } from 'viem'
 import { PERMIT2_ADDRESS, NATIVE_TOKEN_ADDRESS } from '@/lib/constants'
 import type { Token }            from '@/lib/providers/types'
 
@@ -16,7 +16,8 @@ export function useApproval(
   spenderOverride?: `0x${string}`,
 ) {
   const native  = isNative(token)
-  const spender = spenderOverride ?? PERMIT2_ADDRESS
+  // getAddress() normalizes to proper EIP-55 checksum — viem rejects non-checksummed addresses
+  const spender = getAddress(spenderOverride ?? PERMIT2_ADDRESS)
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address:      token?.address as `0x${string}`,

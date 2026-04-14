@@ -6,13 +6,13 @@ import type { SwapQuoteParams, PriceResult, SwapQuoteResult } from './types'
 
 const ODOS_BASE = 'https://api.odos.xyz'
 
-// Odos v2 router addresses per chain
+// Odos v2 router addresses per chain (lowercase — normalized to EIP-55 checksum at call time)
 export const ODOS_ROUTERS: Record<number, `0x${string}`> = {
-  1:     '0xcf5540fffCdc3d510B18bFcA6d2b9987b0772559',
-  137:   '0x4E3288c9ca110bCC82bf38F09A7b425c095d92Bb',
-  42161: '0xa669e7A0d4b3e4Fa48af2dE86BD4CD7126Be4e1',
-  10:    '0xCa423977156BB05b13A2BA3b76Bc5419E2fE9680',
-  8453:  '0x19cEeAd7105607Cd444F5ad10dd51356436095a1',
+  1:     '0xcf5540fffcdc3d510b18bfca6d2b9987b0772559',
+  137:   '0x4e3288c9ca110bcc82bf38f09a7b425c095d92bb',
+  42161: '0xa669e7a0d4b3e4fa48af2de86bd4cd7126be4e1',
+  10:    '0xca423977156bb05b13a2ba3b76bc5419e2fe9680',
+  8453:  '0x19cead7105607cd444f5ad10dd51356436095a1',
 }
 
 export function getOdosRouter(chainId: number): `0x${string}` | undefined {

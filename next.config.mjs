@@ -1,6 +1,5 @@
-import type { NextConfig } from 'next'
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Required for wagmi/viem SSR compatibility
   webpack: (config) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding')

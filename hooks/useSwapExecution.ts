@@ -48,6 +48,13 @@ export function useSwapExecution() {
 
       let txData = tx.data as Hex
 
+      // Safety: never send a contract-creation transaction by accident.
+      // If `to` is missing/null the EVM treats it as a contract deployment.
+      const toAddress = tx.to as `0x${string}` | undefined
+      if (!toAddress || toAddress === '0x' || toAddress === '0x0000000000000000000000000000000000000000') {
+        throw new Error('Invalid swap transaction: missing destination address')
+      }
+
       // 2. Permit2 EIP-712 signing — only needed for 0x
       const provider = quote.providerName ?? preferredProvider ?? '0x'
       if (provider === '0x' && quote.permit2?.eip712) {
@@ -58,14 +65,16 @@ export function useSwapExecution() {
           message:     message     as Parameters<typeof signTypedDataAsync>[0]['message'],
           primaryType: primaryType as string,
         })
-        // Append Permit2 signature to calldata
-        txData = concat([txData, signature.slice(2) as Hex])
+        // Append Permit2 signature to calldata.
+        // IMPORTANT: pass `signature` directly — do NOT slice off the 0x prefix.
+        // viem's concat expects full 0x-prefixed hex strings.
+        txData = concat([txData, signature])
       }
 
       // 3. Send transaction (works for all providers — Odos/KyberSwap need no signature)
       setStatus('pending')
       const hash = await sendTransactionAsync({
-        to:    tx.to    as `0x${string}`,
+        to:    toAddress,
         data:  txData,
         value: BigInt(tx.value ?? '0'),
         gas:   BigInt(tx.gas   ?? '0'),

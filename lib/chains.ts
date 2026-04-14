@@ -1,7 +1,7 @@
-import { polygon, mainnet, arbitrum, optimism, base } from 'wagmi/chains'
+import { polygon, mainnet, arbitrum, optimism, base, celo } from 'wagmi/chains'
 import type { Chain } from 'wagmi/chains'
 
-export const SUPPORTED_CHAINS: Chain[] = [polygon, mainnet, arbitrum, optimism, base]
+export const SUPPORTED_CHAINS: Chain[] = [polygon, mainnet, arbitrum, optimism, base, celo]
 
 export const DEFAULT_CHAIN = polygon
 
@@ -11,6 +11,7 @@ export const CHAIN_RPC_URLS: Record<number, string> = {
   42161: process.env.NEXT_PUBLIC_ARBITRUM_RPC ?? 'https://arb1.arbitrum.io/rpc',
   10:    process.env.NEXT_PUBLIC_OPTIMISM_RPC ?? 'https://mainnet.optimism.io',
   8453:  process.env.NEXT_PUBLIC_BASE_RPC     ?? 'https://mainnet.base.org',
+  42220: process.env.NEXT_PUBLIC_CELO_RPC     ?? 'https://forno.celo.org',
 }
 
 export const CHAIN_NAMES: Record<number, string> = {
@@ -19,6 +20,7 @@ export const CHAIN_NAMES: Record<number, string> = {
   42161: 'Arbitrum',
   10:    'Optimism',
   8453:  'Base',
+  42220: 'Celo',
 }
 
 export const CHAIN_NATIVE_TOKEN: Record<number, string> = {
@@ -27,6 +29,7 @@ export const CHAIN_NATIVE_TOKEN: Record<number, string> = {
   42161: 'ETH',
   10:    'ETH',
   8453:  'ETH',
+  42220: 'CELO',
 }
 
 export function isSupportedChain(chainId: number): boolean {

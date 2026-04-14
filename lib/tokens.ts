@@ -44,4 +44,8 @@ export const DEFAULT_PAIRS: Record<number, [string, string]> = {
     '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', // ETH (native)
     '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC
   ],
+  42220: [
+    '0x765DE816845861e75A25fCA122bb6898B8B1282a', // cUSD
+    '0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787', // cBRL
+  ],
 }

@@ -90,11 +90,21 @@ export async function getBestPrice(params: SwapQuoteParams): Promise<BestPriceRe
 
   if (allSuccesses.length === 0) throw new Error('NO_LIQUIDITY')
 
-  // Always pick best from fee-capturing providers if any succeeded
-  const candidates = feeSuccesses.length > 0 ? feeSuccesses : fallbackSuccesses
+  // Outlier detection: if a provider returns a price >1000x the median,
+  // it's almost certainly a bug (e.g. OpenOcean returning raw units instead of
+  // human-readable for a less-common token). Discard such results silently.
+  const sanitized = filterOutliers(allSuccesses)
+  const saneSet   = sanitized.length > 0 ? sanitized : allSuccesses // never discard all
+
+  const saneFee      = saneSet.filter((r) => r.supportsFee)
+  const saneFallback = saneSet.filter((r) => !r.supportsFee)
+
+  // Always pick best from fee-capturing providers if any survived sanity check
+  const candidates = saneFee.length > 0 ? saneFee : saneFallback
   const best       = candidates.reduce((a, b) => (a.buyAmount >= b.buyAmount ? a : b))
 
-  return { ...best, allQuotes: allSuccesses }
+  // allQuotes shown in UI: only the sane results so users don't see bogus prices
+  return { ...best, allQuotes: saneSet }
 }
 
 // ─── Firm quote ───────────────────────────────────────────────────────────────
@@ -125,6 +135,40 @@ export async function getBestQuote(
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+// ─── Outlier filter ───────────────────────────────────────────────────────────
+
+/**
+ * Remove results whose buyAmount is more than OUTLIER_RATIO × the median.
+ * This catches providers that return raw-unit amounts instead of human-readable
+ * (e.g. OpenOcean occasionally returning 843,312 EURC when the real answer is 0.847).
+ * A 1000× deviation from the median is impossible in any real market.
+ */
+const OUTLIER_RATIO = 1_000n
+
+function filterOutliers(results: ProviderPriceResult[]): ProviderPriceResult[] {
+  if (results.length <= 1) return results
+
+  const amounts = results.map((r) => r.buyAmount).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+  const mid     = Math.floor(amounts.length / 2)
+  const median  = amounts[mid]
+
+  if (median === 0n) return results  // can't compute ratio safely
+
+  return results.filter((r) => {
+    const ratio = r.buyAmount > median
+      ? r.buyAmount / median
+      : median / r.buyAmount
+    if (ratio > OUTLIER_RATIO) {
+      console.warn(
+        `[aggregator] outlier discarded: ${r.providerName} quoted ${r.buyAmount} ` +
+        `(median ${median}, ratio ${ratio}×)`,
+      )
+      return false
+    }
+    return true
+  })
+}
 
 function collect<T>(settled: PromiseSettledResult<T>[]): T[] {
   const results: T[] = []

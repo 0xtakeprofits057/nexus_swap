@@ -16,6 +16,7 @@ const CHAIN_SLUGS: Record<number, string> = {
   42161: 'arbitrum',
   10:    'optimism',
   8453:  'base',
+  42220: 'celo',
 }
 
 // OpenOcean takes fee in percent (0.3 = 0.3%)

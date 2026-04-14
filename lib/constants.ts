@@ -24,4 +24,5 @@ export const ZRX_BASE_URLS: Record<number, string> = {
   42161: 'https://arbitrum.api.0x.org',
   10:    'https://optimism.api.0x.org',
   8453:  'https://base.api.0x.org',
+  42220: 'https://celo.api.0x.org',
 }

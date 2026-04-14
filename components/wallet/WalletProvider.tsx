@@ -4,15 +4,14 @@ import '@rainbow-me/rainbowkit/styles.css'
 import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
 import { WagmiProvider }                                     from 'wagmi'
 import { http }                                              from 'wagmi'
-import { polygon, mainnet, arbitrum, optimism, base }        from 'wagmi/chains'
+import { polygon, mainnet, arbitrum, optimism, base, celo } from 'wagmi/chains'
 import { QueryClientProvider, QueryClient }                  from '@tanstack/react-query'
 import { useMemo }                                           from 'react'
 
-// LlamaRPC as primary (reliable, no key needed) — env vars override in production
 const config = getDefaultConfig({
   appName:   'Nexus Swap',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
-  chains:    [mainnet, polygon, arbitrum, optimism, base],
+  chains:    [polygon, mainnet, arbitrum, optimism, base, celo],
   ssr:       true,
   transports: {
     [mainnet.id]:  http(process.env.NEXT_PUBLIC_ETHEREUM_RPC  ?? 'https://eth.llamarpc.com'),
@@ -20,6 +19,7 @@ const config = getDefaultConfig({
     [arbitrum.id]: http(process.env.NEXT_PUBLIC_ARBITRUM_RPC  ?? 'https://arbitrum.llamarpc.com'),
     [optimism.id]: http(process.env.NEXT_PUBLIC_OPTIMISM_RPC  ?? 'https://optimism.llamarpc.com'),
     [base.id]:     http(process.env.NEXT_PUBLIC_BASE_RPC      ?? 'https://base.llamarpc.com'),
+    [celo.id]:     http(process.env.NEXT_PUBLIC_CELO_RPC      ?? 'https://forno.celo.org'),
   },
 })
 

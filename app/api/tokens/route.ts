@@ -24,7 +24,7 @@ const UNISWAP_TOKEN_LIST = 'https://tokens.uniswap.org'
 // Polygon curated list for extra local-market tokens
 const POLYGON_TOKEN_LIST = 'https://unpkg.com/quickswap-default-token-list@1.2.33/build/quickswap-default.tokenlist.json'
 
-const SUPPORTED_CHAINS = new Set([1, 137, 42161, 10, 8453])
+const SUPPORTED_CHAINS = new Set([1, 137, 42161, 10, 8453, 42220])
 
 // ─── Cache ────────────────────────────────────────────────────────────────────
 

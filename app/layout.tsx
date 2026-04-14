@@ -19,8 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <span className="text-green-400 font-bold text-lg">⬡ Nexus Swap</span>
               </a>
               <nav className="flex items-center gap-4">
-                <a href="/swap"      className="text-sm text-gray-400 hover:text-white transition-colors">Swap</a>
-                <a href="/analytics" className="text-sm text-gray-400 hover:text-white transition-colors">Analytics</a>
+                <a href="/swap" className="text-sm text-gray-400 hover:text-white transition-colors">Swap</a>
               </nav>
             </div>
             <ConnectButton />

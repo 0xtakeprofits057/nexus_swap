@@ -62,11 +62,10 @@ export function WalletInfoPanel() {
         <div className="flex justify-center">
           <ConnectButton />
         </div>
-        <div className="mt-8 grid grid-cols-3 gap-3 text-xs">
+        <div className="mt-8 grid grid-cols-2 gap-3 text-xs">
           {[
-            { label: 'Fee',        value: '0.30%',        color: 'text-yellow-400' },
-            { label: 'Aggregator', value: '0x Protocol',  color: 'text-blue-400'   },
-            { label: 'Networks',   value: '5 chains',     color: 'text-green-400'  },
+            { label: 'Aggregators', value: '3 sources', color: 'text-blue-400'  },
+            { label: 'Networks',    value: '5 chains',  color: 'text-green-400' },
           ].map(({ label, value, color }) => (
             <div key={label} className="bg-gray-900 border border-gray-800 rounded-xl p-3">
               <div className={`font-semibold ${color}`}>{value}</div>

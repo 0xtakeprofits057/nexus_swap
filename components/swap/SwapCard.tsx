@@ -198,7 +198,7 @@ export function SwapCard() {
       )}
 
       <div className="mt-3 text-center text-xs text-gray-600">
-        0.30% fee · best price across 0x, Odos & KyberSwap
+        best price across 0x, Odos & KyberSwap
       </div>
     </div>
   )

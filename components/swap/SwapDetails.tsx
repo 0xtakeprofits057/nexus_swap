@@ -1,7 +1,6 @@
 'use client'
 
 import { formatPercent, priceImpactColor, formatTokenAmount } from '@/lib/format'
-import { FEE_PERCENTAGE }          from '@/lib/constants'
 import type { Token }              from '@/lib/providers/types'
 import type { ProviderPriceResult } from '@/lib/providers/aggregator'
 
@@ -12,7 +11,7 @@ interface SwapDetailsProps {
   sources:       { name: string; proportion: string }[]
   sellToken:     Token
   buyToken:      Token
-  buyAmount:     bigint
+  buyAmount:     bigint   // kept for comparison display
   providerName:  string
   allQuotes:     ProviderPriceResult[]
 }
@@ -105,14 +104,6 @@ export function SwapDetails({
         <span>Rate</span>
         <span className="text-white">
           1 {sellToken.symbol} = {parseFloat(price).toFixed(4)} {buyToken.symbol}
-        </span>
-      </div>
-
-      {/* Fee */}
-      <div className="flex justify-between text-gray-400">
-        <span>Fee (0.30%)</span>
-        <span className="text-yellow-400">
-          {(Number(buyAmount) * FEE_PERCENTAGE / (1 - FEE_PERCENTAGE) / 10 ** buyToken.decimals).toFixed(4)} {buyToken.symbol}
         </span>
       </div>
 

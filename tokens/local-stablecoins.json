@@ -1,0 +1,81 @@
+{
+  "version": { "major": 1, "minor": 0, "patch": 0 },
+  "name": "Nexus Swap — Local Stablecoins",
+  "tokens": [
+    {
+      "address": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "chainId": 137,
+      "category": "usd-stable",
+      "logoURI": "https://assets.coingecko.com/coins/images/6319/small/usdc.png"
+    },
+    {
+      "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6,
+      "chainId": 137,
+      "category": "usd-stable",
+      "logoURI": "https://assets.coingecko.com/coins/images/325/small/Tether.png"
+    },
+    {
+      "address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+      "symbol": "DAI",
+      "name": "Dai Stablecoin",
+      "decimals": 18,
+      "chainId": 137,
+      "category": "usd-stable",
+      "logoURI": "https://assets.coingecko.com/coins/images/9956/small/Badge_Dai.png"
+    },
+    {
+      "address": "0xe6a537a407488807f0bbeb0038b79004f19dddfb",
+      "symbol": "BRLA",
+      "name": "BRLA Token (Brazilian Real)",
+      "decimals": 18,
+      "chainId": 137,
+      "category": "local-stable",
+      "currency": "BRL",
+      "logoURI": "https://assets.coingecko.com/coins/images/26125/small/brla.png"
+    },
+    {
+      "address": "0x68727e573d21a49c767c3c86a92d9f24bd933c99",
+      "symbol": "EMXN",
+      "name": "Telcoin MXN (Mexican Peso)",
+      "decimals": 2,
+      "chainId": 137,
+      "category": "local-stable",
+      "currency": "MXN",
+      "logoURI": "https://assets.coingecko.com/coins/images/33955/small/EMXN.png"
+    },
+    {
+      "address": "0xE111178A87A3BFf0c8d18DECBa5798827539Ae99",
+      "symbol": "EURS",
+      "name": "Stasis Euro",
+      "decimals": 2,
+      "chainId": 137,
+      "category": "local-stable",
+      "currency": "EUR",
+      "logoURI": "https://assets.coingecko.com/coins/images/5164/small/EURS_300x300.png"
+    },
+    {
+      "address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18,
+      "chainId": 137,
+      "category": "major",
+      "logoURI": "https://assets.coingecko.com/coins/images/2518/small/weth.png"
+    },
+    {
+      "address": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+      "symbol": "WMATIC",
+      "name": "Wrapped POL",
+      "decimals": 18,
+      "chainId": 137,
+      "category": "major",
+      "logoURI": "https://assets.coingecko.com/coins/images/4713/small/polygon.png"
+    }
+  ]
+}

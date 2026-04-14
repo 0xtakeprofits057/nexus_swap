@@ -3,7 +3,10 @@ const nextConfig = {
   // Required for wagmi/viem SSR compatibility
   webpack: (config) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding')
-    // Stub out React Native async storage (required by @metamask/sdk but unused on web)
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      'uint8arrays': false,
+    }
     config.resolve.alias = {
       ...config.resolve.alias,
       '@react-native-async-storage/async-storage': false,

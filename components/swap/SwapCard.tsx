@@ -141,6 +141,7 @@ export function SwapCard() {
             buyToken={buyToken}
             buyAmount={quote.buyAmount}
             providerName={quote.providerName}
+            supportsFee={quote.supportsFee ?? true}
             allQuotes={quote.allQuotes}
           />
         </div>
@@ -198,7 +199,7 @@ export function SwapCard() {
       )}
 
       <div className="mt-3 text-center text-xs text-gray-600">
-        best price across 0x, Odos & KyberSwap
+        best price across 0x · 1inch · Paraswap · OpenOcean · Odos · KyberSwap · LiFi
       </div>
     </div>
   )

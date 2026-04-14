@@ -67,6 +67,7 @@ export async function getKyberPrice(
 
   return {
     providerName:   'KyberSwap',
+    supportsFee:    false,
     routerAddress:  router,
     _routeSummary:  summary,         // passed through for firm quote step
     buyAmount:      outAmount,
@@ -83,7 +84,7 @@ export async function getKyberPrice(
 
 export async function getKyberQuote(
   params: SwapQuoteParams,
-): Promise<SwapQuoteResult & { providerName: string; routerAddress: `0x${string}` }> {
+): Promise<SwapQuoteResult & { providerName: string; supportsFee: false; routerAddress: `0x${string}` }> {
   const base   = getBase(params.chainId)
   const router = KYBER_ROUTERS[params.chainId]
 
@@ -124,6 +125,7 @@ export async function getKyberQuote(
 
   return {
     providerName:  'KyberSwap',
+    supportsFee:   false as const,
     routerAddress: router,
     buyAmount:     outAmount,
     sellAmount:    params.sellAmount,

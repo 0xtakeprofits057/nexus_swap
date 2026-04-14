@@ -36,12 +36,29 @@ export async function getPrice(params: SwapQuoteParams): Promise<PriceResult> {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(err?.validationErrors?.[0]?.reason ?? `0x price error: ${res.status}`)
+    const reason =
+      err?.validationErrors?.[0]?.reason ??
+      err?.reason ??
+      err?.error ??
+      `0x price error: ${res.status}`
+
+    if (
+      res.status === 400 &&
+      (reason.includes('INSUFFICIENT_ASSET_LIQUIDITY') ||
+        reason.includes('SWAP_QUOTE_ERROR') ||
+        reason.includes('NO_ROUTE') ||
+        reason === `0x price error: 400`)
+    ) {
+      throw new Error('NO_LIQUIDITY')
+    }
+    throw new Error(reason)
   }
 
   const data = await res.json()
 
   return {
+    providerName: '0x',
+    supportsFee:  true,
     buyAmount:    BigInt(data.buyAmount ?? '0'),
     price:        data.price ?? '0',
     estimatedGas: BigInt(data.estimatedGas ?? '0'),
@@ -71,7 +88,22 @@ export async function getQuote(params: SwapQuoteParams): Promise<SwapQuoteResult
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(err?.validationErrors?.[0]?.reason ?? `0x quote error: ${res.status}`)
+    const reason =
+      err?.validationErrors?.[0]?.reason ??
+      err?.reason ??
+      err?.error ??
+      `0x quote error: ${res.status}`
+
+    if (
+      res.status === 400 &&
+      (reason.includes('INSUFFICIENT_ASSET_LIQUIDITY') ||
+        reason.includes('SWAP_QUOTE_ERROR') ||
+        reason.includes('NO_ROUTE') ||
+        reason === `0x quote error: 400`)
+    ) {
+      throw new Error('NO_LIQUIDITY')
+    }
+    throw new Error(reason)
   }
 
   const data = await res.json()

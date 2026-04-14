@@ -15,14 +15,15 @@ interface UseSwapQuoteParams {
 }
 
 export interface SwapQuoteData {
-  buyAmount:     bigint
-  price:         string
-  estimatedGas:  bigint
-  priceImpact:   number
-  sources:       { name: string; proportion: string }[]
-  providerName:  string
+  buyAmount:      bigint
+  price:          string
+  estimatedGas:   bigint
+  priceImpact:    number
+  sources:        { name: string; proportion: string }[]
+  providerName:   string
+  supportsFee:    boolean
   routerAddress?: `0x${string}`
-  allQuotes:     ProviderPriceResult[]
+  allQuotes:      ProviderPriceResult[]
 }
 
 export function useSwapQuote({
@@ -67,6 +68,7 @@ export function useSwapQuote({
         priceImpact:   data.priceImpact ?? 0,
         sources:       data.sources ?? [],
         providerName:  data.providerName ?? '0x',
+        supportsFee:   data.supportsFee  ?? true,
         routerAddress: data.routerAddress,
         allQuotes: (data.allQuotes ?? []).map((q: {
           providerName: string

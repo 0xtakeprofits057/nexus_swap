@@ -12,12 +12,15 @@ export interface Token {
 }
 
 export interface SwapQuoteParams {
-  sellToken:   `0x${string}`
-  buyToken:    `0x${string}`
-  sellAmount:  bigint
-  chainId:     number
-  taker:       `0x${string}`
+  sellToken:    `0x${string}`
+  buyToken:     `0x${string}`
+  sellAmount:   bigint
+  chainId:      number
+  taker:        `0x${string}`
   slippageBps?: number
+  // Token decimals — required by Paraswap, optional for others (defaults to 18)
+  srcDecimals?:  number
+  destDecimals?: number
 }
 
 export interface SwapQuoteResult {
@@ -55,4 +58,7 @@ export interface PriceResult {
   // Set by aggregator layer
   providerName?:  string
   routerAddress?: `0x${string}`
+  // Whether this provider captures our fee on execution
+  // If false, this is a fallback route and we earn 0 fee
+  supportsFee?:   boolean
 }

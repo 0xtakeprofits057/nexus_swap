@@ -59,6 +59,7 @@ export async function getOdosPrice(
 
   return {
     providerName:  'Odos',
+    supportsFee:   false,
     routerAddress: router,
     buyAmount:     BigInt(outAmount),
     price:         outAmount && params.sellAmount > 0n
@@ -74,7 +75,7 @@ export async function getOdosPrice(
 
 export async function getOdosQuote(
   params: SwapQuoteParams,
-): Promise<SwapQuoteResult & { providerName: string; routerAddress: `0x${string}` }> {
+): Promise<SwapQuoteResult & { providerName: string; supportsFee: false; routerAddress: `0x${string}` }> {
   const router = ODOS_ROUTERS[params.chainId]
   if (!router) throw new Error(`Odos: chain ${params.chainId} not supported`)
 
@@ -120,6 +121,7 @@ export async function getOdosQuote(
 
   return {
     providerName:  'Odos',
+    supportsFee:   false,
     routerAddress: router,
     buyAmount:     BigInt(outAmount),
     sellAmount:    params.sellAmount,

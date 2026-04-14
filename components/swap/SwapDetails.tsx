@@ -1,7 +1,7 @@
 'use client'
 
 import { formatPercent, priceImpactColor, formatTokenAmount } from '@/lib/format'
-import type { Token }              from '@/lib/providers/types'
+import type { Token }               from '@/lib/providers/types'
 import type { ProviderPriceResult } from '@/lib/providers/aggregator'
 
 interface SwapDetailsProps {
@@ -11,22 +11,38 @@ interface SwapDetailsProps {
   sources:       { name: string; proportion: string }[]
   sellToken:     Token
   buyToken:      Token
-  buyAmount:     bigint   // kept for comparison display
+  buyAmount:     bigint
   providerName:  string
+  supportsFee:   boolean
   allQuotes:     ProviderPriceResult[]
 }
 
-const PROVIDER_COLORS: Record<string, string> = {
+// ─── Provider theming ─────────────────────────────────────────────────────────
+
+const PROVIDER_TEXT: Record<string, string> = {
   '0x':        'text-blue-400',
+  '1inch':     'text-orange-400',
+  'Paraswap':  'text-pink-400',
+  'OpenOcean': 'text-teal-400',
   'Odos':      'text-purple-400',
   'KyberSwap': 'text-cyan-400',
+  'LiFi':      'text-yellow-400',
 }
 
-const PROVIDER_BADGES: Record<string, string> = {
+const PROVIDER_BADGE: Record<string, string> = {
   '0x':        'bg-blue-900/40 border-blue-800/50',
+  '1inch':     'bg-orange-900/40 border-orange-800/50',
+  'Paraswap':  'bg-pink-900/40 border-pink-800/50',
+  'OpenOcean': 'bg-teal-900/40 border-teal-800/50',
   'Odos':      'bg-purple-900/40 border-purple-800/50',
   'KyberSwap': 'bg-cyan-900/40 border-cyan-800/50',
+  'LiFi':      'bg-yellow-900/40 border-yellow-800/50',
 }
+
+function providerText(name: string) { return PROVIDER_TEXT[name] ?? 'text-green-400' }
+function providerBadge(name: string) { return PROVIDER_BADGE[name] ?? 'bg-green-900/40 border-green-800/50' }
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function SwapDetails({
   price,
@@ -37,43 +53,54 @@ export function SwapDetails({
   buyToken,
   buyAmount,
   providerName,
+  supportsFee,
   allQuotes,
 }: SwapDetailsProps) {
-  const topSources = sources
+  const topSources  = sources
     .filter((s) => parseFloat(s.proportion) > 0)
     .sort((a, b) => parseFloat(b.proportion) - parseFloat(a.proportion))
     .slice(0, 3)
 
   const impactClass = priceImpactColor(priceImpact * 100)
-  const color  = PROVIDER_COLORS[providerName] ?? 'text-green-400'
-  const badge  = PROVIDER_BADGES[providerName] ?? 'bg-green-900/40 border-green-800/50'
+  const color  = providerText(providerName)
+  const badge  = providerBadge(providerName)
 
-  // Sort allQuotes best-first for comparison display
-  const sortedQuotes = [...allQuotes].sort((a, b) =>
-    Number(b.buyAmount - a.buyAmount),
-  )
-  const bestAmount = sortedQuotes[0]?.buyAmount ?? 0n
+  // Sort all quotes best-first
+  const sortedQuotes = [...allQuotes].sort((a, b) => Number(b.buyAmount - a.buyAmount))
+  const bestAmount   = sortedQuotes[0]?.buyAmount ?? 0n
 
   return (
     <div className="bg-gray-900/50 rounded-xl p-3 space-y-2 text-sm border border-gray-800">
 
-      {/* Best provider badge */}
-      <div className="flex items-center justify-between">
-        <span className="text-gray-400">Best via</span>
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${badge} ${color}`}>
-          {providerName}
-        </span>
+      {/* Best provider badge + fee fallback warning */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-gray-400 shrink-0">Best via</span>
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${badge} ${color}`}>
+            {providerName}
+          </span>
+          {!supportsFee && (
+            <span
+              className="text-xs px-2 py-0.5 rounded-full bg-amber-900/30 border border-amber-700/50 text-amber-400"
+              title="No fee-capturing route found. Swap will execute but 0% platform fee applies."
+            >
+              ⚠ no fee route
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Multi-provider comparison (shown when >1 quote) */}
+      {/* Multi-provider comparison */}
       {sortedQuotes.length > 1 && (
         <div className="border border-gray-800 rounded-lg overflow-hidden">
           {sortedQuotes.map((q, i) => {
-            const isBest  = i === 0
-            const savings = bestAmount > 0n && !isBest
+            const isBest   = i === 0
+            const savings  = bestAmount > 0n && !isBest
               ? Number((bestAmount - q.buyAmount) * 10000n / bestAmount) / 100
               : 0
-            const qColor  = PROVIDER_COLORS[q.providerName] ?? 'text-gray-400'
+            const qColor   = providerText(q.providerName)
+            const hasFee   = q.supportsFee ?? false
+
             return (
               <div
                 key={q.providerName}
@@ -81,7 +108,14 @@ export function SwapDetails({
                   isBest ? 'bg-gray-800/60' : ''
                 } ${i < sortedQuotes.length - 1 ? 'border-b border-gray-800' : ''}`}
               >
-                <span className={`font-medium ${qColor}`}>{q.providerName}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className={`font-medium ${qColor}`}>{q.providerName}</span>
+                  {!hasFee && (
+                    <span className="text-[10px] text-amber-500/70" title="No platform fee on this route">
+                      (no fee)
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <span className={`tabular-nums ${isBest ? 'text-white' : 'text-gray-500'}`}>
                     {formatTokenAmount(q.buyAmount, buyToken.decimals, 4)} {buyToken.symbol}
@@ -90,7 +124,7 @@ export function SwapDetails({
                     <span className="text-xs text-green-400 font-semibold">Best</span>
                   )}
                   {!isBest && savings > 0 && (
-                    <span className="text-xs text-red-400">-{savings.toFixed(2)}%</span>
+                    <span className="text-xs text-red-400">−{savings.toFixed(2)}%</span>
                   )}
                 </div>
               </div>

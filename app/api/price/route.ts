@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getBestPrice }              from '@/lib/providers/aggregator'
+import { getTokenByAddress }         from '@/lib/tokens'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -15,14 +16,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required params' }, { status: 400 })
   }
 
+  const chain = parseInt(chainId)
+
+  // Look up decimals from curated token list — required by Paraswap, helpful for others
+  const srcDecimals  = getTokenByAddress(sellToken, chain)?.decimals ?? 18
+  const destDecimals = getTokenByAddress(buyToken,  chain)?.decimals ?? 18
+
   try {
     const result = await getBestPrice({
       sellToken,
       buyToken,
-      sellAmount:  BigInt(sellAmount),
-      chainId:     parseInt(chainId),
+      sellAmount:   BigInt(sellAmount),
+      chainId:      chain,
       taker,
-      slippageBps: slippageBps ? parseInt(slippageBps) : undefined,
+      slippageBps:  slippageBps ? parseInt(slippageBps) : undefined,
+      srcDecimals,
+      destDecimals,
     })
 
     return NextResponse.json({
@@ -30,9 +39,11 @@ export async function GET(req: NextRequest) {
       buyAmount:     result.buyAmount.toString(),
       estimatedGas:  result.estimatedGas.toString(),
       providerName:  result.providerName,
+      supportsFee:   result.supportsFee,
       routerAddress: result.routerAddress,
       allQuotes:     result.allQuotes.map(q => ({
         providerName:  q.providerName,
+        supportsFee:   q.supportsFee,
         buyAmount:     q.buyAmount.toString(),
         price:         q.price,
         priceImpact:   q.priceImpact,

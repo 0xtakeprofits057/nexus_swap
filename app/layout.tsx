@@ -1,4 +1,5 @@
 import type { Metadata }     from 'next'
+import Image                 from 'next/image'
 import { WalletProvider }    from '@/components/wallet/WalletProvider'
 import { ConnectButton }     from '@rainbow-me/rainbowkit'
 import './globals.css'
@@ -15,8 +16,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <WalletProvider>
           <header className="border-b border-gray-800 px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <a href="/swap" className="flex items-center gap-2">
-                <span className="text-green-400 font-bold text-lg">⬡ Nexus Swap</span>
+              <a href="/swap" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <Image
+                  src="/nexus-logo.png"
+                  alt="Nexus Data Labs"
+                  width={120}
+                  height={48}
+                  className="h-10 w-auto object-contain"
+                  priority
+                />
               </a>
               <nav className="flex items-center gap-4">
                 <a href="/swap" className="text-sm text-gray-400 hover:text-white transition-colors">Swap</a>

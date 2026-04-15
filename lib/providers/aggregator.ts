@@ -138,23 +138,34 @@ export async function getBestQuote(
 }
 
 async function quoteFromProvider(provider: string, params: SwapQuoteParams): Promise<BestQuoteResult> {
+  let result: BestQuoteResult
+
   switch (provider) {
     case '1inch':
-      return { ...await getOneInchQuote(params),   supportsFee: true  }
+      result = { ...await getOneInchQuote(params),   supportsFee: true  }; break
     case 'Paraswap':
-      return { ...await getParaswapQuote(params),  supportsFee: true  }
+      result = { ...await getParaswapQuote(params),  supportsFee: true  }; break
     case 'OpenOcean':
-      return { ...await getOpenOceanQuote(params), supportsFee: true  }
+      result = { ...await getOpenOceanQuote(params), supportsFee: true  }; break
     case 'Odos':
-      return { ...await getOdosQuote(params),      supportsFee: false }
+      result = { ...await getOdosQuote(params),      supportsFee: false }; break
     case 'KyberSwap':
-      return { ...await getKyberQuote(params),     supportsFee: false }
+      result = { ...await getKyberQuote(params),     supportsFee: false }; break
     case 'LiFi':
-      return { ...await getLiFiQuote(params),      supportsFee: false }
+      result = { ...await getLiFiQuote(params),      supportsFee: false }; break
     case '0x':
     default:
-      return { ...await getZeroXQuote(params), providerName: '0x', supportsFee: true }
+      result = { ...await getZeroXQuote(params), providerName: '0x', supportsFee: true }; break
   }
+
+  // Validate transaction.to — a missing address would cause a contract deployment
+  // instead of a swap. Throw here so getBestQuote falls back to the next provider.
+  const to = result.transaction?.to
+  if (!to || to === '0x' || to === '0x0000000000000000000000000000000000000000') {
+    throw new Error(`${provider}: firm quote returned missing transaction.to — skipping`)
+  }
+
+  return result
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

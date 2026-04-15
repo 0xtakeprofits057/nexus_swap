@@ -1,16 +1,17 @@
 'use client'
 
-import { useState }                                               from 'react'
-import { useSignTypedData, useSendTransaction, useAccount }       from 'wagmi'
-import { concat, Hex }                                            from 'viem'
-import type { Token }                                             from '@/lib/providers/types'
+import { useState }                                                       from 'react'
+import { useSignTypedData, useSendTransaction, useAccount, usePublicClient } from 'wagmi'
+import { concat, Hex }                                                    from 'viem'
+import type { Token }                                                     from '@/lib/providers/types'
 
-export type SwapStatus = 'idle' | 'signing' | 'pending' | 'success' | 'error'
+export type SwapStatus = 'idle' | 'signing' | 'pending' | 'confirming' | 'success' | 'error'
 
 export function useSwapExecution() {
   const { address }              = useAccount()
   const { signTypedDataAsync }   = useSignTypedData()
   const { sendTransactionAsync } = useSendTransaction()
+  const publicClient             = usePublicClient()
   const [status,  setStatus]     = useState<SwapStatus>('idle')
   const [txHash,  setTxHash]     = useState<`0x${string}` | undefined>()
   const [error,   setError]      = useState<string | undefined>()
@@ -80,9 +81,15 @@ export function useSwapExecution() {
         gas:   BigInt(tx.gas   ?? '0'),
       })
       setTxHash(hash)
+
+      // 4. Wait for on-chain confirmation (1 block)
+      setStatus('confirming')
+      if (publicClient) {
+        await publicClient.waitForTransactionReceipt({ hash, confirmations: 1 })
+      }
       setStatus('success')
 
-      // 4. Analytics (non-blocking)
+      // 5. Analytics (non-blocking)
       void fetch('/api/analytics/swap', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },

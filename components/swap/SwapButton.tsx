@@ -95,6 +95,14 @@ export function SwapButton({
     )
   }
 
+  if (swapStatus === 'confirming') {
+    return (
+      <button disabled className="w-full py-4 rounded-xl font-semibold text-base bg-green-600 text-white opacity-80 cursor-not-allowed">
+        <span className="flex items-center justify-center gap-2"><Spinner /> Confirming on-chain...</span>
+      </button>
+    )
+  }
+
   return (
     <button
       onClick={onSwap}

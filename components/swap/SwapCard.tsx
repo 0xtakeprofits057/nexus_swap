@@ -84,6 +84,7 @@ export function SwapCard() {
         42161: `https://arbiscan.io/tx/${txHash}`,
         10:    `https://optimistic.etherscan.io/tx/${txHash}`,
         8453:  `https://basescan.org/tx/${txHash}`,
+        42220: `https://celoscan.io/tx/${txHash}`,
       }[chainId] ?? `https://polygonscan.com/tx/${txHash}`)
     : undefined
 
@@ -164,14 +165,34 @@ export function SwapCard() {
         </div>
       )}
 
-      {swapStatus === 'success' && txHash && explorerTxUrl && (
-        <div className="mt-3 p-3 bg-green-900/20 border border-green-800/50 rounded-xl text-green-400 text-sm flex items-center justify-between">
-          <span>✓ Swap confirmed!</span>
+      {swapStatus === 'confirming' && txHash && explorerTxUrl && (
+        <div className="mt-3 p-3 bg-blue-900/20 border border-blue-800/50 rounded-xl text-blue-300 text-sm flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Waiting for on-chain confirmation…
+          </span>
           <a
             href={explorerTxUrl}
             target="_blank"
             rel="noreferrer"
-            className="underline text-green-300 hover:text-green-200"
+            className="underline text-blue-300 hover:text-blue-200 shrink-0 ml-2"
+          >
+            View tx ↗
+          </a>
+        </div>
+      )}
+
+      {swapStatus === 'success' && txHash && explorerTxUrl && (
+        <div className="mt-3 p-3 bg-green-900/20 border border-green-800/50 rounded-xl text-green-400 text-sm flex items-center justify-between">
+          <span>✓ Swap confirmed on-chain!</span>
+          <a
+            href={explorerTxUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-green-300 hover:text-green-200 shrink-0 ml-2"
           >
             View tx ↗
           </a>
@@ -192,7 +213,7 @@ export function SwapCard() {
         />
       </div>
 
-      {swapStatus !== 'idle' && swapStatus !== 'signing' && swapStatus !== 'pending' && (
+      {swapStatus !== 'idle' && swapStatus !== 'signing' && swapStatus !== 'pending' && swapStatus !== 'confirming' && (
         <button
           onClick={reset}
           className="mt-2 w-full text-center text-xs text-gray-500 hover:text-gray-300 transition-colors"

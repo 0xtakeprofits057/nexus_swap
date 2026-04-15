@@ -108,6 +108,15 @@ export async function getQuote(params: SwapQuoteParams): Promise<SwapQuoteResult
 
   const data = await res.json()
 
+  // Validate the transaction object — a missing or empty `to` would cause a
+  // contract-creation transaction instead of a swap. Throw so the aggregator
+  // falls back to another provider.
+  const txTo = data.transaction?.to as string | undefined
+  if (!txTo || txTo === '0x' || txTo === '0x0000000000000000000000000000000000000000') {
+    console.warn('[0x] quote returned no `transaction.to` — skipping this provider')
+    throw new Error('0x: invalid transaction (missing destination address)')
+  }
+
   // Build a human-readable route string
   const route = (data.sources as { name: string; proportion: string }[])
     ?.filter((s) => parseFloat(s.proportion) > 0)
@@ -123,7 +132,7 @@ export async function getQuote(params: SwapQuoteParams): Promise<SwapQuoteResult
     route,
     sources:      data.sources ?? [],
     transaction: {
-      to:    data.transaction.to    as `0x${string}`,
+      to:    txTo as `0x${string}`,
       data:  data.transaction.data  as `0x${string}`,
       value: BigInt(data.transaction.value ?? '0'),
       gas:   BigInt(data.transaction.gas ?? '0'),

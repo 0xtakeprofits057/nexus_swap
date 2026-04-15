@@ -53,6 +53,9 @@ export function SwapCard() {
   const { executeSwap, status: swapStatus, txHash, error: swapError, reset } =
     useSwapExecution()
 
+  // Clear any lingering swap error when the user changes tokens or amount
+  useEffect(() => { reset() }, [sellToken?.address, buyToken?.address, sellAmountStr]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSwap = useCallback(async () => {
     if (!sellToken || !buyToken) return
     await executeSwap(

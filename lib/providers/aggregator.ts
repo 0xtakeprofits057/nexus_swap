@@ -113,8 +113,31 @@ export async function getBestQuote(
   params:            SwapQuoteParams,
   preferredProvider?: string,
 ): Promise<BestQuoteResult> {
-  const provider = preferredProvider ?? '0x'
+  // Try providers in order: preferred first, then fallbacks
+  // This ensures users always get a working swap even when one provider fails
+  const preferred = preferredProvider ?? '0x'
+  const fallbackOrder = ['Odos', 'KyberSwap', '0x', '1inch', 'Paraswap', 'OpenOcean', 'LiFi']
+  const order = [preferred, ...fallbackOrder.filter((p) => p !== preferred)]
 
+  let lastError: Error | undefined
+
+  for (const provider of order) {
+    try {
+      const result = await quoteFromProvider(provider, params)
+      if (provider !== preferred) {
+        console.info(`[aggregator] firm quote: fell back from ${preferred} to ${provider}`)
+      }
+      return result
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      console.warn(`[aggregator] firm quote failed for ${provider}:`, lastError.message)
+    }
+  }
+
+  throw lastError ?? new Error('All providers failed to return a firm quote')
+}
+
+async function quoteFromProvider(provider: string, params: SwapQuoteParams): Promise<BestQuoteResult> {
   switch (provider) {
     case '1inch':
       return { ...await getOneInchQuote(params),   supportsFee: true  }
